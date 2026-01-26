@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>{{ app_name }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <img class="logo" src="{{ logo_url }}" alt="BookHub logo">
+        <div class="brand-text">
+          <h1>{{ app_name }}</h1>
+          <p>Personal EPUB Library & AI Book Assistant</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-wrap">
+          {% for category, msg in messages %}
+            <div class="flash {{ category }}">{{ msg }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Upload -->
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Upload</h2>
+          <div class="hint">Add an EPUB to your library (stored locally).</div>
+        </div>
+      </div>
+
+      <form class="upload" action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+        <input id="epubInput" class="file-hidden" type="file" name="epub" accept=".epub" required>
+        <label for="epubInput" class="file-btn">📘 Choose EPUB</label>
+        <span id="fileName" class="file-name">No file selected</span>
+        <button class="btn" type="submit">Upload</button>
+      </form>
+    </section>
+
+    <!-- Library -->
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Library</h2>
+          <div class="hint">Click “Talk about this” to focus the assistant on one book.</div>
+        </div>
+
+        <div class="selected" id="selectedPill" style="display:none;">
+          <span id="selectedTitle"></span>
+          <button class="btn small" id="clearSelection" type="button">Clear</button>
+        </div>
+      </div>
+
+      {% if not books %}
+        <div class="empty">
+          <div class="empty-card">
+            <h3>No books yet</h3>
+            <p>Upload an EPUB to start your library.</p>
+          </div>
+        </div>
+      {% else %}
+        <div class="grid">
+          {% for b in books %}
+          <article class="card" data-book-id="{{ b.id }}" data-book-title="{{ b.title }}">
+            <div class="cover">
+              <img src="{{ b.cover_path or url_for('static', filename='cover_placeholder.svg') }}" alt="Cover">
+            </div>
+
+            <div class="meta">
+              <h3 class="title">{{ b.title }}</h3>
+              <p class="author">{{ b.author or "Unknown author" }}</p>
+              <p class="lang">{{ b.language or "" }}</p>
+
+              <div class="card-actions">
+                <button class="btn small talkBtn"
+                        type="button"
+                        data-book-id="{{ b.id }}"
+                        data-book-title="{{ b.title }}">
+                  Talk about this
+                </button>
+
+                <form action="{{ url_for('delete', book_id=b.id) }}"
+                      method="post"
+                      onsubmit="return confirm('Delete this book?');">
+                  <button class="btn small danger" type="submit">Delete</button>
+                </form>
+              </div>
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </section>
+
+    <!-- Assistant -->
+    <section class="panel chat-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Assistant</h2>
+          <div class="hint">Try: “Summarize chapter 1”, “When does X happen?”, “Remind me of the twist”.</div>
+        </div>
+      </div>
+
+      <div class="chat-box" id="chatBox"></div>
+
+      <form class="chat-form" id="chatForm">
+        <input class="chat-input" id="chatInput" placeholder="Ask about your books…" autocomplete="off"/>
+        <button class="btn" type="submit">Send</button>
+      </form>
+    </section>
+
+  </main>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
