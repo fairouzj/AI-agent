@@ -1,4 +1,3 @@
-# Fairouz Juma 22110054
 ## BookHub 
 is a python based web application that allow users to upload books in EPUB, store them locally and interact using an AI agent that works as an assistant
 But instead of acting as a chatbot with generic answers, it works as a book focused AI agent since it only answer questions using the content of the uploaded books, helps users to remember plot points, characters and important scenes. And because of its functionality it prevents hallucination by requiring book selection and retreival 
